@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 3 — User Auth System</title>
+<style>
+  :root {
+    --bg:#ffffff;--bg2:#f7f6f2;--bg3:#eeecea;
+    --text:#1a1a18;--text2:#5a5954;--border:#d8d6cf;
+    --purple:#534ab7;--purple-l:#eeedfe;
+    --teal:#0f6e56;--teal-l:#e1f5ee;
+    --amber:#854f0b;--amber-l:#faeeda;
+    --blue:#185fa5;--blue-l:#e6f1fb;
+    --green:#3b6d11;--green-l:#eaf3de;
+    --coral:#993c1d;--coral-l:#faece7;
+    --pink:#993556;--pink-l:#fbeaf0;
+    --red:#a32d2d;--red-l:#fcebeb;
+    --code-bg:#1e1e2e;--code-text:#cdd6f4;
+    --radius:10px;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#1a1a18;--bg2:#242420;--bg3:#2e2e2a;
+      --text:#e8e6df;--text2:#9c9a92;--border:#3a3a35;
+      --purple:#afa9ec;--purple-l:#26215c;
+      --teal:#5dcaa5;--teal-l:#04342c;
+      --amber:#fac775;--amber-l:#412402;
+      --blue:#85b7eb;--blue-l:#042c53;
+      --green:#97c459;--green-l:#173404;
+      --coral:#f0997b;--coral-l:#4a1b0c;
+      --pink:#ed93b1;--pink-l:#4b1528;
+      --red:#f09595;--red-l:#501313;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;}
+  .container{max-width:880px;margin:0 auto;padding:40px 24px 100px;}
+
+  h1{font-size:26px;font-weight:700;margin-bottom:6px;}
+  h2{font-size:18px;font-weight:700;margin:48px 0 14px;padding-top:10px;border-top:2px solid var(--border);}
+  h3{font-size:15px;font-weight:600;margin:20px 0 8px;}
+  p{margin-bottom:12px;}
+  .subtitle{color:var(--text2);font-size:14px;margin-bottom:32px;}
+
+  /* ── topic explain block ── */
+  .topic-block{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:20px 0;}
+  .topic-eyebrow{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
+  .topic-headline{font-size:16px;font-weight:600;margin-bottom:10px;}
+
+  /* ── step header ── */
+  .step-hdr{display:flex;align-items:center;gap:12px;margin:44px 0 14px;}
+  .step-num{background:var(--purple);color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+  .step-ttl{font-size:18px;font-weight:600;}
+  .new-badge{background:var(--teal-l);color:var(--teal);font-size:11px;font-weight:600;border-radius:4px;padding:2px 8px;margin-left:8px;vertical-align:middle;}
+
+  /* ── info boxes ── */
+  .box{border-radius:var(--radius);padding:14px 18px;margin:14px 0;font-size:14px;border-left:3px solid;}
+  .box ul,.box ol{padding-left:18px;margin-top:6px;} .box li{margin-bottom:4px;}
+  .b-purple{background:var(--purple-l);border-color:var(--purple);}
+  .b-teal  {background:var(--teal-l);  border-color:var(--teal);}
+  .b-amber {background:var(--amber-l); border-color:var(--amber);}
+  .b-blue  {background:var(--blue-l);  border-color:var(--blue);}
+  .b-green {background:var(--green-l); border-color:var(--green);}
+  .b-coral {background:var(--coral-l); border-color:var(--coral);}
+  .b-pink  {background:var(--pink-l);  border-color:var(--pink);}
+
+  /* ── code ── */
+  .cw{border-radius:var(--radius);overflow:hidden;margin:14px 0;border:1px solid var(--border);}
+  .cl{background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;padding:7px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .cb{background:none;border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:11px;padding:2px 9px;cursor:pointer;}
+  .cb:hover{background:var(--bg3);}
+  pre{background:var(--code-bg);color:var(--code-text);padding:18px;font-size:13px;line-height:1.65;overflow-x:auto;font-family:'Fira Code','Cascadia Code',monospace;}
+  .kw{color:#cba6f7;}.cl2{color:#89b4fa;}.an{color:#fab387;}
+  .st{color:#a6e3a1;}.cm{color:#6c7086;}.fn{color:#89dceb;}.nm{color:#f38ba8;}
+
+  /* ── flow diagram ── */
+  .flow-v{display:flex;flex-direction:column;gap:0;margin:16px 0;}
+  .flow-row{display:flex;align-items:stretch;gap:10px;margin-bottom:0;}
+  .flow-step{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;}
+  .flow-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+  .flow-line{width:2px;flex:1;min-height:14px;margin:0 auto;}
+  .flow-body{flex:1;padding:8px 14px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px;font-size:13px;line-height:1.5;}
+  .flow-body strong{display:block;font-size:14px;margin-bottom:3px;}
+  .fc-purple .flow-dot{background:var(--purple-l);color:var(--purple);} .fc-purple .flow-line{background:var(--purple);}
+  .fc-blue   .flow-dot{background:var(--blue-l);  color:var(--blue);}   .fc-blue   .flow-line{background:var(--blue);}
+  .fc-amber  .flow-dot{background:var(--amber-l); color:var(--amber);}  .fc-amber  .flow-line{background:var(--amber);}
+  .fc-teal   .flow-dot{background:var(--teal-l);  color:var(--teal);}   .fc-teal   .flow-line{background:var(--teal);}
+  .fc-green  .flow-dot{background:var(--green-l); color:var(--green);}  .fc-green  .flow-line{background:var(--green);}
+  .fc-coral  .flow-dot{background:var(--coral-l); color:var(--coral);}  .fc-coral  .flow-line{background:var(--coral);}
+
+  /* ── horizontal flow ── */
+  .h-flow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:14px 0;}
+  .h-pill{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;text-align:center;}
+  .h-pill small{display:block;font-size:11px;color:var(--text2);margin-top:2px;font-weight:400;}
+  .h-arrow{color:var(--text2);font-size:18px;padding:0 2px;}
+  .hp-purple{background:var(--purple-l);border-color:var(--purple);color:var(--purple);}
+  .hp-teal  {background:var(--teal-l);  border-color:var(--teal);  color:var(--teal);}
+  .hp-amber {background:var(--amber-l); border-color:var(--amber); color:var(--amber);}
+  .hp-blue  {background:var(--blue-l);  border-color:var(--blue);  color:var(--blue);}
+  .hp-green {background:var(--green-l); border-color:var(--green); color:var(--green);}
+
+  /* ── jwt visual ── */
+  .jwt-wrap{display:flex;gap:0;border-radius:8px;overflow:hidden;margin:14px 0;font-family:monospace;font-size:12px;}
+  .jwt-seg{padding:10px 14px;flex:1;text-align:center;word-break:break-all;}
+  .js-h{background:#45475a;color:#cba6f7;}
+  .js-p{background:#313244;color:#a6e3a1;}
+  .js-s{background:#1e1e2e;color:#fab387;}
+  .jwt-seg span{display:block;font-size:10px;opacity:.7;margin-top:4px;font-weight:600;}
+
+  /* ── role grid ── */
+  .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+  .role-card{border-radius:10px;padding:14px 18px;border:1px solid;}
+  .rc-admin{background:var(--coral-l);border-color:var(--coral);}
+  .rc-user {background:var(--green-l);border-color:var(--green);}
+  .role-card strong{display:block;font-size:14px;margin-bottom:8px;}
+  .role-card ul{padding-left:16px;font-size:13px;}
+  .role-card li{margin-bottom:4px;}
+
+  /* ── filetree ── */
+  .ft{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;font-family:monospace;font-size:13px;line-height:2;margin:14px 0;}
+  .ft .fd{color:var(--blue);font-weight:600;}
+  .ft .fi{color:var(--text2);}
+  .ft .fn2{color:var(--teal);font-weight:600;}
+
+  /* ── table ── */
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:14px 0;}
+  th{background:var(--bg2);padding:9px 14px;text-align:left;font-weight:600;border:1px solid var(--border);}
+  td{padding:9px 14px;border:1px solid var(--border);vertical-align:top;}
+  td code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:12px;}
+
+  .method{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:2px 7px;margin-right:5px;}
+  .mget{background:var(--green-l);color:var(--green);}
+  .mpost{background:var(--blue-l);color:var(--blue);}
+
+  .tag{display:inline-block;background:var(--purple-l);color:var(--purple);font-size:11px;font-weight:600;border-radius:4px;padding:2px 8px;margin:2px;}
+  .hr{border:none;border-top:1px solid var(--border);margin:40px 0;}
+  .resp-ok {background:var(--code-bg);color:#a6e3a1;border-radius:var(--radius);padding:12px 16px;font-family:monospace;font-size:13px;margin:8px 0;overflow-x:auto;}
+  .resp-err{background:var(--code-bg);color:#f38ba8;border-radius:var(--radius);padding:12px 16px;font-family:monospace;font-size:13px;margin:8px 0;overflow-x:auto;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ════════════════════ HEADER ════════════════════ -->
+<h1>Project 3 — User Auth System</h1>
+<p class="subtitle">Spring Security · JWT Tokens · BCrypt · Role-Based Access Control</p>
+
+<div class="box b-purple">
+  <strong>What you'll build:</strong> A secure API where users register, login and receive a JWT token. Every protected endpoint checks that token. Admins get full access; regular users get limited access. You'll understand exactly how authentication works under the hood.
+</div>
+
+<p>
+  <span class="tag">Spring Security</span><span class="tag">JWT (jjwt)</span><span class="tag">BCryptPasswordEncoder</span>
+  <span class="tag">@PreAuthorize</span><span class="tag">UserDetailsService</span><span class="tag">OncePerRequestFilter</span>
+  <span class="tag">SecurityFilterChain</span><span class="tag">RBAC</span><span class="tag">STATELESS session</span>
+</p>
+
+
+<!-- ════════════════════ TOPIC 1 ════════════════════ -->
+<h2>Topic 1 — What is Spring Security?</h2>
+
+<div class="topic-block">
+  <div class="topic-eyebrow">Concept</div>
+  <div class="topic-headline">Spring Security wraps every request in a filter chain before it reaches your controller</div>
+  <p style="font-size:14px;color:var(--text2)">Every HTTP request passes through a chain of security filters first. These filters answer: Is the user authenticated? Are they allowed to do this? Only then does the request reach your controller. You configure the rules — Spring enforces them automatically.</p>
+</div>
+
+<div class="h-flow">
+  <div class="h-pill">HTTP Request</div>
+  <div class="h-arrow">→</div>
+  <div class="h-pill hp-purple">Security Filter Chain<small>reads + validates JWT</small></div>
+  <div class="h-arrow">→</div>
+  <div class="h-pill hp-amber">Authentication Manager<small>verifies credentials</small></div>
+  <div class="h-arrow">→</div>
+  <div class="h-pill hp-teal">SecurityContext<small>stores user identity</small></div>
+  <div class="h-arrow">→</div>
+  <div class="h-pill hp-green">Controller<small>your code runs</small></div>
+</div>
+
+<div class="box b-blue">
+  <strong>Key idea:</strong> You never manually check "is user logged in?" in your controller. Spring Security intercepts the request, validates it, stores the user identity in a <code>SecurityContext</code>, then either lets the request reach your controller or returns a <strong>401 Unauthorized</strong> / <strong>403 Forbidden</strong> response automatically.
+</div>
+
+
+<!-- ════════════════════ TOPIC 2 ════════════════════ -->
+<h2>Topic 2 — What is JWT and how does it work?</h2>
+
+<div class="topic-block">
+  <div class="topic-eyebrow">Concept</div>
+  <div class="topic-headline">JWT is a signed, self-contained token that proves who you are — without hitting the database</div>
+  <p style="font-size:14px;color:var(--text2)">After login, the server creates a JWT and sends it to the client. The client sends it back in every request's <code>Authorization</code> header. The server reads the token, verifies the signature, and knows who is making the request — no database lookup needed each time.</p>
+</div>
+
+<p>A JWT has <strong>3 parts</strong> separated by dots (<code>.</code>):</p>
+
+<div class="jwt-wrap">
+  <div class="jwt-seg js-h">eyJhbGciOiJIUzI1NiJ9<span>HEADER — signing algorithm</span></div>
+  <div class="jwt-seg js-p">eyJzdWIiOiJiaGFqYUBtYWlsLmNvbSIsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE2OTk...<span>PAYLOAD — email, roles, expiry time</span></div>
+  <div class="jwt-seg js-s">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_...<span>SIGNATURE — tamper-proof seal using your secret key</span></div>
+</div>
+
+<div class="box b-amber">
+  <strong>The full JWT login + use flow:</strong>
+  <ol>
+    <li>Client sends <code>POST /auth/login</code> with email + password</li>
+    <li>Server verifies password using BCrypt → generates JWT → returns it</li>
+    <li>Client stores the JWT (in memory or localStorage)</li>
+    <li>Every future request: <code>Authorization: Bearer &lt;token&gt;</code></li>
+    <li>Server reads the JWT, verifies the signature with the secret key</li>
+    <li>Server extracts the user's email + roles from the payload</li>
+    <li>Request is allowed or blocked based on roles</li>
+  </ol>
+</div>
+
+<div class="box b-teal">
+  <strong>Why not use sessions?</strong> Traditional apps store user state in the server's memory (session). With JWT, the server is completely <strong>stateless</strong> — it stores nothing. The token itself carries all the information. This scales better and works perfectly for REST APIs and mobile apps.
+</div>
+
+
+<!-- ════════════════════ TOPIC 3 ════════════════════ -->
+<h2>Topic 3 — BCrypt password hashing</h2>
+
+<div class="topic-block">
+  <div class="topic-eyebrow">Concept</div>
+  <div class="topic-headline">Passwords are never stored as plain text — BCrypt converts them to an unreadable hash</div>
+  <p style="font-size:14px;color:var(--text2)">BCrypt is a one-way hashing algorithm. <code>"mypassword"</code> becomes <code>$2a$10$abc123...</code>. You can never reverse it. To verify a login, BCrypt re-hashes the entered password and compares it to the stored hash.</p>
+</div>
+
+<div class="h-flow">
+  <div class="h-pill">password: "pass123"</div>
+  <div class="h-arrow">→</div>
+  <div class="h-pill hp-coral" style="background:var(--coral-l);border-color:var(--coral);color:var(--coral);">BCrypt.encode()</div>
+  <div class="h-arrow">→</div>
+  <div class="h-pill">"$2a$10$xK9mP3..."<small>stored in DB</small></div>
+</div>
+
+<div class="box b-coral">
+  <strong>⚠️ Critical rule:</strong> You must NEVER store plain text passwords in the database. If your database is ever compromised, BCrypt-hashed passwords are practically impossible to reverse. Always call <code>passwordEncoder.encode(rawPassword)</code> before saving.
+</div>
+
+
+<!-- ════════════════════ TOPIC 4 ════════════════════ -->
+<h2>Topic 4 — Role-Based Access Control (RBAC)</h2>
+
+<div class="topic-block">
+  <div class="topic-eyebrow">Concept</div>
+  <div class="topic-headline">Different users can do different things based on their assigned role</div>
+</div>
+
+<div class="role-grid">
+  <div class="role-card rc-admin">
+    <strong>ROLE_ADMIN</strong>
+    <ul>
+      <li>Create / Edit / Delete posts</li>
+      <li>Delete any comment</li>
+      <li>View all registered users</li>
+      <li>Access all endpoints</li>
+    </ul>
+  </div>
+  <div class="role-card rc-user">
+    <strong>ROLE_USER</strong>
+    <ul>
+      <li>Read all posts</li>
+      <li>Add comments</li>
+      <li>Update / delete own comment</li>
+      <li>Cannot manage posts</li>
+    </ul>
+  </div>
+</div>
+
+<div class="box b-green">
+  <strong>How it's enforced in code:</strong> Add <code>@PreAuthorize("hasRole('ADMIN')")</code> on a controller method. Spring Security reads the roles from the JWT token and checks before calling your method. If the role doesn't match — it returns <strong>403 Forbidden</strong> automatically.
+</div>
+
+
+<!-- ════════════════════ TOPIC 5 — FULL FLOW ════════════════════ -->
+<h2>Topic 5 — How all 4 security classes connect (full flow)</h2>
+
+<div class="topic-block">
+  <div class="topic-eyebrow">Architecture</div>
+  <div class="topic-headline">4 classes in the security/ package work together like an assembly line</div>
+</div>
+
+<div class="flow-v">
+  <div class="flow-row fc-blue">
+    <div class="flow-step">
+      <div class="flow-dot">1</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-body">
+      <strong>JwtAuthFilter.java — intercepts every request</strong>
+      Reads the <code>Authorization: Bearer &lt;token&gt;</code> header. Calls JwtUtils to validate. If valid, loads the user and sets them in SecurityContext.
+    </div>
+  </div>
+  <div class="flow-row fc-purple">
+    <div class="flow-step">
+      <div class="flow-dot">2</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-body">
+      <strong>JwtUtils.java — token factory + validator</strong>
+      On login: builds a JWT with email + expiry, signs it with the secret key. On each request: parses the token, verifies the signature, returns the email.
+    </div>
+  </div>
+  <div class="flow-row fc-amber">
+    <div class="flow-step">
+      <div class="flow-dot">3</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-body">
+      <strong>CustomUserDetailsService.java — loads user from DB</strong>
+      Spring Security calls <code>loadUserByUsername(email)</code> to get the full user with their roles. You implement this using your UserRepository.
+    </div>
+  </div>
+  <div class="flow-row fc-teal">
+    <div class="flow-step">
+      <div class="flow-dot">4</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-body">
+      <strong>SecurityConfig.java — master rules</strong>
+      Defines which URLs are public, which need a JWT, registers the JwtAuthFilter, sets session to STATELESS, configures BCrypt.
+    </div>
+  </div>
+  <div class="flow-row fc-green">
+    <div class="flow-step">
+      <div class="flow-dot">5</div>
+    </div>
+    <div class="flow-body" style="margin-bottom:0">
+      <strong>@PreAuthorize on controller methods — final gate</strong>
+      After the filter chain passes, method-level security checks the role. <code>hasRole('ADMIN')</code> vs <code>hasAnyRole('USER','ADMIN')</code> — Spring enforces this before your method body runs.
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════ STEP 1 ════════════════════ -->
+<h2>Step 1 — Create project &amp; add JWT dependency</h2>
+
+<p>Go to <strong>https://start.spring.io</strong>:</p>
+<ul style="padding-left:22px;line-height:2.2">
+  <li><strong>Artifact:</strong> user-auth &nbsp;·&nbsp; <strong>Java:</strong> 17 &nbsp;·&nbsp; <strong>Packaging:</strong> Jar</li>
+  <li><strong>Dependencies:</strong> Spring Web · Spring Data JPA · H2 Database · <strong>Spring Security</strong> · Validation</li>
+</ul>
+
+<p>Then manually add the JWT library to <code>pom.xml</code> — Spring Initializr doesn't have it:</p>
+
+<div class="cw">
+  <div class="cl">pom.xml — add inside &lt;dependencies&gt; <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="cm">&lt;!-- JWT library (jjwt) --&gt;</span>
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-api&lt;/artifactId&gt;
+    &lt;version&gt;0.11.5&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-impl&lt;/artifactId&gt;
+    &lt;version&gt;0.11.5&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt-jackson&lt;/artifactId&gt;
+    &lt;version&gt;0.11.5&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+
+<div class="box b-amber">
+  After pasting, IntelliJ shows a Maven sync icon — click it (or right-click <code>pom.xml</code> → Maven → Reload Project). This downloads the JWT jars.
+</div>
+
+
+<!-- ════════════════════ STEP 2 ════════════════════ -->
+<h2>Step 2 — Configure application.properties</h2>
+
+<div class="cw">
+  <div class="cl">src/main/resources/application.properties <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="cm"># H2 in-memory database</span>
+spring.datasource.url=jdbc:h2:mem:authdb
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.h2.console.enabled=true
+server.port=8080
+
+<span class="cm"># JWT config ─────────────────────────────────────────</span>
+<span class="cm"># Secret key — must be at least 256 bits (32 chars) for HS256</span>
+app.jwt.secret=mySecretKeyForJWTWhichMustBe256BitsLongForHS256Algo12345678
+<span class="cm"># Token validity in milliseconds — 86400000 = 24 hours</span>
+app.jwt.expiration=86400000</code></pre>
+</div>
+
+<div class="box b-blue">
+  <strong>app.jwt.secret</strong> — The key used to sign and verify every JWT token. In production, store this in an environment variable, never in your code or config file checked into Git.
+</div>
+
+
+<!-- ════════════════════ STEP 3 ════════════════════ -->
+<h2>Step 3 — Project structure</h2>
+
+<div class="ft">
+  <span class="fd">user-auth/src/main/java/com/example/userauth/</span><br>
+  &nbsp;&nbsp;<span class="fn2">model/</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">User.java</span>          <span class="fi">← entity: id, name, email, password(hash), role</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">Role.java</span>          <span class="fi">← enum: ROLE_USER, ROLE_ADMIN</span><br>
+  &nbsp;&nbsp;<span class="fn2">dto/</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">RegisterRequest.java</span>  <span class="fi">← name + email + password from client</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">LoginRequest.java</span>     <span class="fi">← email + password from client</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">AuthResponse.java</span>     <span class="fi">← token returned to client after login</span><br>
+  &nbsp;&nbsp;<span class="fn2">repository/</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">UserRepository.java</span><br>
+  &nbsp;&nbsp;<span class="fn2">security/</span>             <span class="fi">← NEW — all 4 security files live here</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">JwtUtils.java</span>         <span class="fi">← creates + validates JWT tokens</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">JwtAuthFilter.java</span>    <span class="fi">← intercepts every request, reads the token</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">CustomUserDetailsService.java</span>  <span class="fi">← loads user from DB by email</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">SecurityConfig.java</span>   <span class="fi">← master config: public vs secured routes</span><br>
+  &nbsp;&nbsp;<span class="fn2">controller/</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">AuthController.java</span>   <span class="fi">← /auth/register and /auth/login</span><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn2">TestController.java</span>   <span class="fi">← test endpoints to verify roles work</span><br>
+  &nbsp;&nbsp;<span class="fn2">DataLoader.java</span>       <span class="fi">← creates admin user on startup</span>
+</div>
+
+
+<!-- ════════════════════ STEP 4 ════════════════════ -->
+<h2>Step 4 — Create Role enum and User entity</h2>
+
+<div class="cw">
+  <div class="cl">model/Role.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.model;
+
+<span class="kw">public enum</span> <span class="cl2">Role</span> {
+    ROLE_USER,   <span class="cm">// regular user</span>
+    ROLE_ADMIN   <span class="cm">// admin with full access</span>
+}</code></pre>
+</div>
+
+<div class="cw">
+  <div class="cl">model/User.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.model;
+
+<span class="kw">import</span> jakarta.persistence.*;
+
+<span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"users"</span>)
+<span class="kw">public class</span> <span class="cl2">User</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cl2">Long</span> id;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cl2">String</span> name;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>)
+    <span class="kw">private</span> <span class="cl2">String</span> email;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cl2">String</span> password; <span class="cm">// ALWAYS stored as a BCrypt hash, never plain text</span>
+
+    <span class="an">@Enumerated</span>(EnumType.STRING) <span class="cm">// stores "ROLE_USER" string in DB, not a number</span>
+    <span class="kw">private</span> <span class="cl2">Role</span> role;
+
+    <span class="kw">public</span> <span class="fn">User</span>() {}
+
+    <span class="kw">public</span> <span class="fn">User</span>(<span class="cl2">String</span> name, <span class="cl2">String</span> email, <span class="cl2">String</span> password, <span class="cl2">Role</span> role) {
+        <span class="kw">this</span>.name = name; <span class="kw">this</span>.email = email;
+        <span class="kw">this</span>.password = password; <span class="kw">this</span>.role = role;
+    }
+
+    <span class="kw">public</span> <span class="cl2">Long</span>   <span class="fn">getId</span>()               { <span class="kw">return</span> id; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getName</span>()             { <span class="kw">return</span> name; }
+    <span class="kw">public void</span>    <span class="fn">setName</span>(<span class="cl2">String</span> n)     { <span class="kw">this</span>.name = n; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getEmail</span>()            { <span class="kw">return</span> email; }
+    <span class="kw">public void</span>    <span class="fn">setEmail</span>(<span class="cl2">String</span> e)    { <span class="kw">this</span>.email = e; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getPassword</span>()         { <span class="kw">return</span> password; }
+    <span class="kw">public void</span>    <span class="fn">setPassword</span>(<span class="cl2">String</span> p) { <span class="kw">this</span>.password = p; }
+    <span class="kw">public</span> <span class="cl2">Role</span>   <span class="fn">getRole</span>()              { <span class="kw">return</span> role; }
+    <span class="kw">public void</span>    <span class="fn">setRole</span>(<span class="cl2">Role</span> r)        { <span class="kw">this</span>.role = r; }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 5 ════════════════════ -->
+<h2>Step 5 — Create DTOs</h2>
+
+<div class="cw">
+  <div class="cl">dto/RegisterRequest.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.dto;
+
+<span class="kw">import</span> jakarta.validation.constraints.*;
+
+<span class="kw">public class</span> <span class="cl2">RegisterRequest</span> {
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"Name is required"</span>)
+    <span class="kw">private</span> <span class="cl2">String</span> name;
+
+    <span class="an">@NotBlank</span> <span class="an">@Email</span>(message = <span class="st">"Valid email required"</span>)
+    <span class="kw">private</span> <span class="cl2">String</span> email;
+
+    <span class="an">@NotBlank</span>
+    <span class="an">@Size</span>(min = <span class="nm">6</span>, message = <span class="st">"Password must be at least 6 characters"</span>)
+    <span class="kw">private</span> <span class="cl2">String</span> password;
+
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getName</span>()               { <span class="kw">return</span> name; }
+    <span class="kw">public void</span>    <span class="fn">setName</span>(<span class="cl2">String</span> n)      { <span class="kw">this</span>.name = n; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getEmail</span>()              { <span class="kw">return</span> email; }
+    <span class="kw">public void</span>    <span class="fn">setEmail</span>(<span class="cl2">String</span> e)     { <span class="kw">this</span>.email = e; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getPassword</span>()           { <span class="kw">return</span> password; }
+    <span class="kw">public void</span>    <span class="fn">setPassword</span>(<span class="cl2">String</span> p)  { <span class="kw">this</span>.password = p; }
+}</code></pre>
+</div>
+
+<div class="cw">
+  <div class="cl">dto/LoginRequest.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.dto;
+
+<span class="kw">import</span> jakarta.validation.constraints.*;
+
+<span class="kw">public class</span> <span class="cl2">LoginRequest</span> {
+
+    <span class="an">@NotBlank</span> <span class="an">@Email</span>
+    <span class="kw">private</span> <span class="cl2">String</span> email;
+
+    <span class="an">@NotBlank</span>
+    <span class="kw">private</span> <span class="cl2">String</span> password;
+
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getEmail</span>()              { <span class="kw">return</span> email; }
+    <span class="kw">public void</span>    <span class="fn">setEmail</span>(<span class="cl2">String</span> e)    { <span class="kw">this</span>.email = e; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getPassword</span>()           { <span class="kw">return</span> password; }
+    <span class="kw">public void</span>    <span class="fn">setPassword</span>(<span class="cl2">String</span> p) { <span class="kw">this</span>.password = p; }
+}</code></pre>
+</div>
+
+<div class="cw">
+  <div class="cl">dto/AuthResponse.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.dto;
+
+<span class="kw">public class</span> <span class="cl2">AuthResponse</span> {
+
+    <span class="kw">private</span> <span class="cl2">String</span> token;
+    <span class="kw">private</span> <span class="cl2">String</span> tokenType = <span class="st">"Bearer"</span>;
+    <span class="kw">private</span> <span class="cl2">String</span> message;
+
+    <span class="kw">public</span> <span class="fn">AuthResponse</span>(<span class="cl2">String</span> token, <span class="cl2">String</span> message) {
+        <span class="kw">this</span>.token = token;
+        <span class="kw">this</span>.message = message;
+    }
+
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getToken</span>()      { <span class="kw">return</span> token; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getTokenType</span>()  { <span class="kw">return</span> tokenType; }
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getMessage</span>()    { <span class="kw">return</span> message; }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 6 ════════════════════ -->
+<h2>Step 6 — Repository</h2>
+
+<div class="cw">
+  <div class="cl">repository/UserRepository.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.repository;
+
+<span class="kw">import</span> com.example.userauth.model.User;
+<span class="kw">import</span> org.springframework.data.jpa.repository.JpaRepository;
+<span class="kw">import</span> org.springframework.stereotype.Repository;
+<span class="kw">import</span> java.util.Optional;
+
+<span class="an">@Repository</span>
+<span class="kw">public interface</span> <span class="cl2">UserRepository</span> <span class="kw">extends</span> <span class="cl2">JpaRepository</span>&lt;<span class="cl2">User</span>, <span class="cl2">Long</span>&gt; {
+
+    <span class="cl2">Optional</span>&lt;<span class="cl2">User</span>&gt; <span class="fn">findByEmail</span>(<span class="cl2">String</span> email);  <span class="cm">// used during login</span>
+    <span class="kw">boolean</span> <span class="fn">existsByEmail</span>(<span class="cl2">String</span> email);        <span class="cm">// check duplicate on register</span>
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 7 ════════════════════ -->
+<h2>Step 7 — JwtUtils <span class="new-badge">Creates &amp; validates tokens</span></h2>
+
+<div class="box b-purple">
+  This class does exactly two things: <strong>generate</strong> a signed JWT after successful login, and <strong>validate + parse</strong> a JWT on every incoming request to extract the user's email.
+</div>
+
+<div class="cw">
+  <div class="cl">security/JwtUtils.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.security;
+
+<span class="kw">import</span> io.jsonwebtoken.*;
+<span class="kw">import</span> io.jsonwebtoken.security.Keys;
+<span class="kw">import</span> org.springframework.beans.factory.annotation.Value;
+<span class="kw">import</span> org.springframework.security.core.Authentication;
+<span class="kw">import</span> org.springframework.security.core.userdetails.UserDetails;
+<span class="kw">import</span> org.springframework.stereotype.Component;
+<span class="kw">import</span> java.security.Key;
+<span class="kw">import</span> java.util.Date;
+
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl2">JwtUtils</span> {
+
+    <span class="an">@Value</span>(<span class="st">"${app.jwt.secret}"</span>)       <span class="cm">// reads value from application.properties</span>
+    <span class="kw">private</span> <span class="cl2">String</span> jwtSecret;
+
+    <span class="an">@Value</span>(<span class="st">"${app.jwt.expiration}"</span>)
+    <span class="kw">private long</span> jwtExpiration;
+
+    <span class="cm">// Build a cryptographic signing key from the secret string</span>
+    <span class="kw">private</span> <span class="cl2">Key</span> <span class="fn">getSigningKey</span>() {
+        <span class="kw">return</span> Keys.<span class="fn">hmacShaKeyFor</span>(jwtSecret.<span class="fn">getBytes</span>());
+    }
+
+    <span class="cm">// ── Called after successful login: create a JWT ───</span>
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">generateToken</span>(<span class="cl2">Authentication</span> authentication) {
+        <span class="cl2">UserDetails</span> user = (<span class="cl2">UserDetails</span>) authentication.<span class="fn">getPrincipal</span>();
+
+        <span class="kw">return</span> <span class="cl2">Jwts</span>.<span class="fn">builder</span>()
+            .<span class="fn">setSubject</span>(user.<span class="fn">getUsername</span>())              <span class="cm">// stores email in token payload</span>
+            .<span class="fn">setIssuedAt</span>(<span class="kw">new</span> <span class="cl2">Date</span>())                     <span class="cm">// creation time</span>
+            .<span class="fn">setExpiration</span>(<span class="kw">new</span> <span class="cl2">Date</span>(
+                <span class="cl2">System</span>.<span class="fn">currentTimeMillis</span>() + jwtExpiration)) <span class="cm">// expiry time</span>
+            .<span class="fn">signWith</span>(<span class="fn">getSigningKey</span>())                   <span class="cm">// signs with secret key</span>
+            .<span class="fn">compact</span>();                                  <span class="cm">// builds the final JWT string</span>
+    }
+
+    <span class="cm">// ── Extract email from a token ────────────────────</span>
+    <span class="kw">public</span> <span class="cl2">String</span> <span class="fn">getEmailFromToken</span>(<span class="cl2">String</span> token) {
+        <span class="kw">return</span> <span class="cl2">Jwts</span>.<span class="fn">parserBuilder</span>()
+            .<span class="fn">setSigningKey</span>(<span class="fn">getSigningKey</span>())
+            .<span class="fn">build</span>()
+            .<span class="fn">parseClaimsJws</span>(token)
+            .<span class="fn">getBody</span>()
+            .<span class="fn">getSubject</span>();  <span class="cm">// returns the email we stored as subject</span>
+    }
+
+    <span class="cm">// ── Check if token is valid (signature ok + not expired) ─</span>
+    <span class="kw">public boolean</span> <span class="fn">validateToken</span>(<span class="cl2">String</span> token) {
+        <span class="kw">try</span> {
+            <span class="cl2">Jwts</span>.<span class="fn">parserBuilder</span>()
+                .<span class="fn">setSigningKey</span>(<span class="fn">getSigningKey</span>())
+                .<span class="fn">build</span>()
+                .<span class="fn">parseClaimsJws</span>(token); <span class="cm">// throws if invalid or expired</span>
+            <span class="kw">return true</span>;
+        } <span class="kw">catch</span> (<span class="cl2">JwtException</span> | <span class="cl2">IllegalArgumentException</span> e) {
+            <span class="cl2">System</span>.out.<span class="fn">println</span>(<span class="st">"Invalid JWT: "</span> + e.<span class="fn">getMessage</span>());
+            <span class="kw">return false</span>;
+        }
+    }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 8 ════════════════════ -->
+<h2>Step 8 — CustomUserDetailsService <span class="new-badge">Bridge to your DB</span></h2>
+
+<div class="box b-teal">
+  <strong>Why does this exist?</strong> Spring Security knows nothing about your <code>User</code> entity. It works with its own <code>UserDetails</code> interface. This class is the bridge — it loads your user from your database and converts it into the format Spring Security understands.
+</div>
+
+<div class="cw">
+  <div class="cl">security/CustomUserDetailsService.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.security;
+
+<span class="kw">import</span> com.example.userauth.repository.UserRepository;
+<span class="kw">import</span> org.springframework.security.core.authority.SimpleGrantedAuthority;
+<span class="kw">import</span> org.springframework.security.core.userdetails.*;
+<span class="kw">import</span> org.springframework.stereotype.Service;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl2">CustomUserDetailsService</span> <span class="kw">implements</span> <span class="cl2">UserDetailsService</span> {
+
+    <span class="kw">private final</span> <span class="cl2">UserRepository</span> userRepository;
+
+    <span class="kw">public</span> <span class="fn">CustomUserDetailsService</span>(<span class="cl2">UserRepository</span> userRepository) {
+        <span class="kw">this</span>.userRepository = userRepository;
+    }
+
+    <span class="cm">// Spring Security calls this automatically with the email</span>
+    <span class="an">@Override</span>
+    <span class="kw">public</span> <span class="cl2">UserDetails</span> <span class="fn">loadUserByUsername</span>(<span class="cl2">String</span> email)
+            <span class="kw">throws</span> <span class="cl2">UsernameNotFoundException</span> {
+
+        <span class="kw">var</span> user = userRepository.<span class="fn">findByEmail</span>(email)
+            .<span class="fn">orElseThrow</span>(() ->
+                <span class="kw">new</span> <span class="cl2">UsernameNotFoundException</span>(<span class="st">"User not found: "</span> + email));
+
+        <span class="cm">// Convert our Role enum → Spring Security's GrantedAuthority</span>
+        <span class="kw">var</span> authority = <span class="kw">new</span> <span class="cl2">SimpleGrantedAuthority</span>(user.<span class="fn">getRole</span>().<span class="fn">name</span>());
+
+        <span class="cm">// Return Spring's built-in User object (not our entity)</span>
+        <span class="kw">return new</span> org.springframework.security.core.userdetails.<span class="cl2">User</span>(
+            user.<span class="fn">getEmail</span>(),    <span class="cm">// username = email</span>
+            user.<span class="fn">getPassword</span>(), <span class="cm">// BCrypt hash</span>
+            <span class="cl2">List</span>.<span class="fn">of</span>(authority)   <span class="cm">// roles list</span>
+        );
+    }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 9 ════════════════════ -->
+<h2>Step 9 — JwtAuthFilter <span class="new-badge">Intercepts every request</span></h2>
+
+<div class="box b-blue">
+  This filter runs on <strong>every single HTTP request</strong> — before any controller. It reads the JWT from the header, validates it, loads the user, and tells Spring Security "this is who this request belongs to."
+</div>
+
+<div class="cw">
+  <div class="cl">security/JwtAuthFilter.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.security;
+
+<span class="kw">import</span> jakarta.servlet.*;
+<span class="kw">import</span> jakarta.servlet.http.*;
+<span class="kw">import</span> org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+<span class="kw">import</span> org.springframework.security.core.context.SecurityContextHolder;
+<span class="kw">import</span> org.springframework.security.core.userdetails.UserDetails;
+<span class="kw">import</span> org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+<span class="kw">import</span> org.springframework.stereotype.Component;
+<span class="kw">import</span> org.springframework.util.StringUtils;
+<span class="kw">import</span> org.springframework.web.filter.OncePerRequestFilter;
+<span class="kw">import</span> java.io.IOException;
+
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl2">JwtAuthFilter</span> <span class="kw">extends</span> <span class="cl2">OncePerRequestFilter</span> {
+    <span class="cm">// OncePerRequestFilter = guaranteed to run exactly ONCE per request</span>
+
+    <span class="kw">private final</span> <span class="cl2">JwtUtils</span>                jwtUtils;
+    <span class="kw">private final</span> <span class="cl2">CustomUserDetailsService</span> userDetailsService;
+
+    <span class="kw">public</span> <span class="fn">JwtAuthFilter</span>(<span class="cl2">JwtUtils</span> j, <span class="cl2">CustomUserDetailsService</span> u) {
+        <span class="kw">this</span>.jwtUtils = j;
+        <span class="kw">this</span>.userDetailsService = u;
+    }
+
+    <span class="an">@Override</span>
+    <span class="kw">protected void</span> <span class="fn">doFilterInternal</span>(<span class="cl2">HttpServletRequest</span>  request,
+                                      <span class="cl2">HttpServletResponse</span> response,
+                                      <span class="cl2">FilterChain</span>         filterChain)
+            <span class="kw">throws</span> <span class="cl2">ServletException</span>, <span class="cl2">IOException</span> {
+
+        <span class="cm">// 1. Pull token from "Authorization: Bearer xxx" header</span>
+        <span class="cl2">String</span> token = <span class="fn">extractToken</span>(request);
+
+        <span class="cm">// 2. Only proceed if token exists AND signature is valid</span>
+        <span class="kw">if</span> (<span class="cl2">StringUtils</span>.<span class="fn">hasText</span>(token) && jwtUtils.<span class="fn">validateToken</span>(token)) {
+
+            <span class="cm">// 3. Get the email stored inside the token</span>
+            <span class="cl2">String</span> email = jwtUtils.<span class="fn">getEmailFromToken</span>(token);
+
+            <span class="cm">// 4. Load the full user (with roles) from database</span>
+            <span class="cl2">UserDetails</span> userDetails = userDetailsService.<span class="fn">loadUserByUsername</span>(email);
+
+            <span class="cm">// 5. Create an Authentication object containing user + roles</span>
+            <span class="kw">var</span> authToken = <span class="kw">new</span> <span class="cl2">UsernamePasswordAuthenticationToken</span>(
+                userDetails, <span class="kw">null</span>, userDetails.<span class="fn">getAuthorities</span>());
+            authToken.<span class="fn">setDetails</span>(
+                <span class="kw">new</span> <span class="cl2">WebAuthenticationDetailsSource</span>().<span class="fn">buildDetails</span>(request));
+
+            <span class="cm">// 6. Tell Spring Security: "this request is authenticated"</span>
+            <span class="cl2">SecurityContextHolder</span>.<span class="fn">getContext</span>().<span class="fn">setAuthentication</span>(authToken);
+        }
+
+        <span class="cm">// 7. Always continue to the next filter / controller</span>
+        filterChain.<span class="fn">doFilter</span>(request, response);
+    }
+
+    <span class="cm">// Strips "Bearer " prefix from the Authorization header value</span>
+    <span class="kw">private</span> <span class="cl2">String</span> <span class="fn">extractToken</span>(<span class="cl2">HttpServletRequest</span> request) {
+        <span class="cl2">String</span> header = request.<span class="fn">getHeader</span>(<span class="st">"Authorization"</span>);
+        <span class="kw">if</span> (<span class="cl2">StringUtils</span>.<span class="fn">hasText</span>(header) && header.<span class="fn">startsWith</span>(<span class="st">"Bearer "</span>)) {
+            <span class="kw">return</span> header.<span class="fn">substring</span>(<span class="nm">7</span>); <span class="cm">// skip "Bearer " (7 characters)</span>
+        }
+        <span class="kw">return null</span>;
+    }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 10 ════════════════════ -->
+<h2>Step 10 — SecurityConfig <span class="new-badge">Master configuration</span></h2>
+
+<div class="box b-purple">
+  This is the most important file in the project. It wires up all the security pieces and defines the rules: which endpoints are public, which need a token, and how the JWT filter is registered.
+</div>
+
+<div class="cw">
+  <div class="cl">security/SecurityConfig.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.security;
+
+<span class="kw">import</span> org.springframework.context.annotation.*;
+<span class="kw">import</span> org.springframework.http.HttpMethod;
+<span class="kw">import</span> org.springframework.security.authentication.*;
+<span class="kw">import</span> org.springframework.security.config.annotation.authentication.configuration.*;
+<span class="kw">import</span> org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+<span class="kw">import</span> org.springframework.security.config.annotation.web.builders.HttpSecurity;
+<span class="kw">import</span> org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+<span class="kw">import</span> org.springframework.security.config.http.SessionCreationPolicy;
+<span class="kw">import</span> org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+<span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;
+<span class="kw">import</span> org.springframework.security.web.SecurityFilterChain;
+<span class="kw">import</span> org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+<span class="an">@Configuration</span>
+<span class="an">@EnableWebSecurity</span>    <span class="cm">// activates Spring Security for this app</span>
+<span class="an">@EnableMethodSecurity</span> <span class="cm">// enables @PreAuthorize on controller methods</span>
+<span class="kw">public class</span> <span class="cl2">SecurityConfig</span> {
+
+    <span class="kw">private final</span> <span class="cl2">JwtAuthFilter</span>             jwtAuthFilter;
+    <span class="kw">private final</span> <span class="cl2">CustomUserDetailsService</span>   userDetailsService;
+
+    <span class="kw">public</span> <span class="fn">SecurityConfig</span>(<span class="cl2">JwtAuthFilter</span> f, <span class="cl2">CustomUserDetailsService</span> u) {
+        jwtAuthFilter = f; userDetailsService = u;
+    }
+
+    <span class="cm">// ── Bean 1: BCrypt password encoder ───────────────</span>
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="cl2">PasswordEncoder</span> <span class="fn">passwordEncoder</span>() {
+        <span class="kw">return new</span> <span class="cl2">BCryptPasswordEncoder</span>();
+    }
+
+    <span class="cm">// ── Bean 2: Authentication manager ────────────────</span>
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="cl2">AuthenticationManager</span> <span class="fn">authenticationManager</span>(
+            <span class="cl2">AuthenticationConfiguration</span> config) <span class="kw">throws</span> <span class="cl2">Exception</span> {
+        <span class="kw">return</span> config.<span class="fn">getAuthenticationManager</span>();
+    }
+
+    <span class="cm">// ── Bean 3: Security filter chain — THE main config ─</span>
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="cl2">SecurityFilterChain</span> <span class="fn">securityFilterChain</span>(<span class="cl2">HttpSecurity</span> http)
+            <span class="kw">throws</span> <span class="cl2">Exception</span> {
+        http
+            <span class="cm">// CSRF not needed for stateless REST APIs</span>
+            .<span class="fn">csrf</span>(csrf -> csrf.<span class="fn">disable</span>())
+
+            <span class="cm">// No server sessions — every request must bring a JWT</span>
+            .<span class="fn">sessionManagement</span>(sess ->
+                sess.<span class="fn">sessionCreationPolicy</span>(SessionCreationPolicy.STATELESS))
+
+            <span class="cm">// ── URL access rules ──────────────────────────</span>
+            .<span class="fn">authorizeHttpRequests</span>(auth -> auth
+
+                <span class="cm">// Public endpoints — no token needed</span>
+                .<span class="fn">requestMatchers</span>(<span class="st">"/auth/**"</span>).<span class="fn">permitAll</span>()
+                .<span class="fn">requestMatchers</span>(<span class="st">"/h2-console/**"</span>).<span class="fn">permitAll</span>()
+
+                <span class="cm">// GET requests on /api/** are public (anyone can read)</span>
+                .<span class="fn">requestMatchers</span>(HttpMethod.GET, <span class="st">"/api/**"</span>).<span class="fn">permitAll</span>()
+
+                <span class="cm">// Everything else requires a valid JWT token</span>
+                .<span class="fn">anyRequest</span>().<span class="fn">authenticated</span>()
+            )
+
+            <span class="cm">// Allow H2 console to render inside an iframe</span>
+            .<span class="fn">headers</span>(h -> h.<span class="fn">frameOptions</span>(f -> f.<span class="fn">disable</span>()))
+
+            <span class="cm">// Wire our custom UserDetailsService</span>
+            .<span class="fn">userDetailsService</span>(userDetailsService)
+
+            <span class="cm">// Insert our JWT filter BEFORE Spring's default auth filter</span>
+            .<span class="fn">addFilterBefore</span>(jwtAuthFilter,
+                <span class="cl2">UsernamePasswordAuthenticationFilter</span>.<span class="kw">class</span>);
+
+        <span class="kw">return</span> http.<span class="fn">build</span>();
+    }
+}</code></pre>
+</div>
+
+<div class="box b-amber">
+  <strong>3 key decisions explained:</strong>
+  <ul>
+    <li><code>csrf.disable()</code> — CSRF protection is for browser-based form sessions. REST APIs use tokens instead, so we turn it off.</li>
+    <li><code>SessionCreationPolicy.STATELESS</code> — server creates no HTTP session at all. Every request is independent and must carry a JWT.</li>
+    <li><code>addFilterBefore(jwtAuthFilter, ...)</code> — our filter runs before Spring's default, so the user's identity is set before any access check happens.</li>
+  </ul>
+</div>
+
+
+<!-- ════════════════════ STEP 11 ════════════════════ -->
+<h2>Step 11 — AuthController</h2>
+
+<div class="cw">
+  <div class="cl">controller/AuthController.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.controller;
+
+<span class="kw">import</span> com.example.userauth.dto.*;
+<span class="kw">import</span> com.example.userauth.model.*;
+<span class="kw">import</span> com.example.userauth.repository.UserRepository;
+<span class="kw">import</span> com.example.userauth.security.JwtUtils;
+<span class="kw">import</span> jakarta.validation.Valid;
+<span class="kw">import</span> org.springframework.http.*;
+<span class="kw">import</span> org.springframework.security.authentication.*;
+<span class="kw">import</span> org.springframework.security.core.Authentication;
+<span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;
+<span class="kw">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/auth"</span>)
+<span class="kw">public class</span> <span class="cl2">AuthController</span> {
+
+    <span class="kw">private final</span> <span class="cl2">UserRepository</span>       userRepository;
+    <span class="kw">private final</span> <span class="cl2">PasswordEncoder</span>       passwordEncoder;
+    <span class="kw">private final</span> <span class="cl2">AuthenticationManager</span> authManager;
+    <span class="kw">private final</span> <span class="cl2">JwtUtils</span>             jwtUtils;
+
+    <span class="kw">public</span> <span class="fn">AuthController</span>(<span class="cl2">UserRepository</span> ur, <span class="cl2">PasswordEncoder</span> pe,
+                           <span class="cl2">AuthenticationManager</span> am, <span class="cl2">JwtUtils</span> jwt) {
+        userRepository = ur; passwordEncoder = pe;
+        authManager = am; jwtUtils = jwt;
+    }
+
+    <span class="cm">// ── POST /auth/register ───────────────────────────</span>
+    <span class="an">@PostMapping</span>(<span class="st">"/register"</span>)
+    <span class="kw">public</span> <span class="cl2">ResponseEntity</span>&lt;<span class="cl2">String</span>&gt; <span class="fn">register</span>(
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="cl2">RegisterRequest</span> req) {
+
+        <span class="kw">if</span> (userRepository.<span class="fn">existsByEmail</span>(req.<span class="fn">getEmail</span>())) {
+            <span class="kw">return</span> <span class="cl2">ResponseEntity</span>
+                .<span class="fn">status</span>(HttpStatus.BAD_REQUEST)
+                .<span class="fn">body</span>(<span class="st">"Email already registered!"</span>);
+        }
+
+        <span class="cl2">User</span> user = <span class="kw">new</span> <span class="cl2">User</span>();
+        user.<span class="fn">setName</span>(req.<span class="fn">getName</span>());
+        user.<span class="fn">setEmail</span>(req.<span class="fn">getEmail</span>());
+        <span class="cm">// Hash the password before saving — NEVER save plain text</span>
+        user.<span class="fn">setPassword</span>(passwordEncoder.<span class="fn">encode</span>(req.<span class="fn">getPassword</span>()));
+        user.<span class="fn">setRole</span>(Role.ROLE_USER);  <span class="cm">// all new users get ROLE_USER by default</span>
+
+        userRepository.<span class="fn">save</span>(user);
+        <span class="kw">return</span> <span class="cl2">ResponseEntity</span>
+            .<span class="fn">status</span>(HttpStatus.CREATED)
+            .<span class="fn">body</span>(<span class="st">"User registered successfully!"</span>);
+    }
+
+    <span class="cm">// ── POST /auth/login ──────────────────────────────</span>
+    <span class="an">@PostMapping</span>(<span class="st">"/login"</span>)
+    <span class="kw">public</span> <span class="cl2">ResponseEntity</span>&lt;<span class="cl2">AuthResponse</span>&gt; <span class="fn">login</span>(
+            <span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="cl2">LoginRequest</span> req) {
+
+        <span class="cm">// AuthenticationManager loads user from DB via CustomUserDetailsService,</span>
+        <span class="cm">// then BCrypt-compares the provided password with the stored hash.</span>
+        <span class="cm">// If wrong → throws BadCredentialsException automatically (401)</span>
+        <span class="cl2">Authentication</span> auth = authManager.<span class="fn">authenticate</span>(
+            <span class="kw">new</span> <span class="cl2">UsernamePasswordAuthenticationToken</span>(
+                req.<span class="fn">getEmail</span>(), req.<span class="fn">getPassword</span>())
+        );
+
+        <span class="cm">// Password matched — generate and return the JWT</span>
+        <span class="cl2">String</span> token = jwtUtils.<span class="fn">generateToken</span>(auth);
+        <span class="kw">return</span> <span class="cl2">ResponseEntity</span>.<span class="fn">ok</span>(
+            <span class="kw">new</span> <span class="cl2">AuthResponse</span>(token, <span class="st">"Login successful!"</span>));
+    }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 12 ════════════════════ -->
+<h2>Step 12 — TestController <span class="new-badge">Verify roles work</span></h2>
+
+<div class="cw">
+  <div class="cl">controller/TestController.java <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth.controller;
+
+<span class="kw">import</span> org.springframework.http.ResponseEntity;
+<span class="kw">import</span> org.springframework.security.access.prepost.PreAuthorize;
+<span class="kw">import</span> org.springframework.security.core.Authentication;
+<span class="kw">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st">"/api"</span>)
+<span class="kw">public class</span> <span class="cl2">TestController</span> {
+
+    <span class="cm">// No token needed — allowed via SecurityConfig permitAll() on GET /api/**</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/public"</span>)
+    <span class="kw">public</span> <span class="cl2">ResponseEntity</span>&lt;<span class="cl2">String</span>&gt; <span class="fn">publicEndpoint</span>() {
+        <span class="kw">return</span> <span class="cl2">ResponseEntity</span>.<span class="fn">ok</span>(<span class="st">"Anyone can see this — no token needed!"</span>);
+    }
+
+    <span class="cm">// Any logged-in user (ROLE_USER or ROLE_ADMIN)</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/user"</span>)
+    <span class="an">@PreAuthorize</span>(<span class="st">"hasAnyRole('USER', 'ADMIN')"</span>)
+    <span class="kw">public</span> <span class="cl2">ResponseEntity</span>&lt;<span class="cl2">String</span>&gt; <span class="fn">userEndpoint</span>(<span class="cl2">Authentication</span> auth) {
+        <span class="kw">return</span> <span class="cl2">ResponseEntity</span>.<span class="fn">ok</span>(
+            <span class="st">"Hello "</span> + auth.<span class="fn">getName</span>() + <span class="st">"! You are authenticated."</span>);
+    }
+
+    <span class="cm">// ONLY ROLE_ADMIN can reach this — others get 403 Forbidden</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/admin"</span>)
+    <span class="an">@PreAuthorize</span>(<span class="st">"hasRole('ADMIN')"</span>)
+    <span class="kw">public</span> <span class="cl2">ResponseEntity</span>&lt;<span class="cl2">String</span>&gt; <span class="fn">adminEndpoint</span>() {
+        <span class="kw">return</span> <span class="cl2">ResponseEntity</span>.<span class="fn">ok</span>(<span class="st">"Hello Admin! You have full access."</span>);
+    }
+
+    <span class="cm">// Shows current user's email and assigned roles from the JWT</span>
+    <span class="an">@GetMapping</span>(<span class="st">"/me"</span>)
+    <span class="an">@PreAuthorize</span>(<span class="st">"isAuthenticated()"</span>)
+    <span class="kw">public</span> <span class="cl2">ResponseEntity</span>&lt;<span class="cl2">String</span>&gt; <span class="fn">getMe</span>(<span class="cl2">Authentication</span> auth) {
+        <span class="kw">return</span> <span class="cl2">ResponseEntity</span>.<span class="fn">ok</span>(
+            <span class="st">"Email: "</span> + auth.<span class="fn">getName</span>() +
+            <span class="st">" | Roles: "</span> + auth.<span class="fn">getAuthorities</span>());
+    }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 13 ════════════════════ -->
+<h2>Step 13 — DataLoader (pre-create an admin user)</h2>
+
+<div class="cw">
+  <div class="cl">DataLoader.java (base package) <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code><span class="kw">package</span> com.example.userauth;
+
+<span class="kw">import</span> com.example.userauth.model.*;
+<span class="kw">import</span> com.example.userauth.repository.UserRepository;
+<span class="kw">import</span> org.springframework.boot.CommandLineRunner;
+<span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;
+<span class="kw">import</span> org.springframework.stereotype.Component;
+
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl2">DataLoader</span> <span class="kw">implements</span> <span class="cl2">CommandLineRunner</span> {
+
+    <span class="kw">private final</span> <span class="cl2">UserRepository</span> userRepo;
+    <span class="kw">private final</span> <span class="cl2">PasswordEncoder</span> encoder;
+
+    <span class="kw">public</span> <span class="fn">DataLoader</span>(<span class="cl2">UserRepository</span> r, <span class="cl2">PasswordEncoder</span> e) {
+        userRepo = r; encoder = e;
+    }
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">run</span>(<span class="cl2">String</span>... args) {
+        <span class="kw">if</span> (!userRepo.<span class="fn">existsByEmail</span>(<span class="st">"admin@blog.com"</span>)) {
+            userRepo.<span class="fn">save</span>(<span class="kw">new</span> <span class="cl2">User</span>(
+                <span class="st">"Admin"</span>,
+                <span class="st">"admin@blog.com"</span>,
+                encoder.<span class="fn">encode</span>(<span class="st">"admin123"</span>),  <span class="cm">// BCrypt hashed before saving</span>
+                Role.ROLE_ADMIN
+            ));
+            <span class="cl2">System</span>.out.<span class="fn">println</span>(<span class="st">"✅ Admin created — email: admin@blog.com | pass: admin123"</span>);
+        }
+    }
+}</code></pre>
+</div>
+
+
+<!-- ════════════════════ STEP 14 — TEST ════════════════════ -->
+<h2>Step 14 — Run and test (follow this exact sequence)</h2>
+
+<p>Run <code>UserAuthApplication.java</code> in IntelliJ. Then test this sequence in Postman or curl:</p>
+
+<h3>Test 1 — Register a new user</h3>
+<div class="cw">
+  <div class="cl">curl <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code>curl -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Bhaja","email":"bhaja@mail.com","password":"pass123"}'</code></pre>
+</div>
+<div class="resp-ok">User registered successfully!</div>
+
+<h3>Test 2 — Login and receive JWT token</h3>
+<div class="cw">
+  <div class="cl">curl <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code>curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"bhaja@mail.com","password":"pass123"}'</code></pre>
+</div>
+<div class="resp-ok">{
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiaGFqYUBtYWlsLmNvbSIsImlhdC...",
+  "tokenType": "Bearer",
+  "message": "Login successful!"
+}</div>
+
+<div class="box b-teal">
+  <strong>Copy that token!</strong> In Postman: Authorization tab → Bearer Token → paste it. In curl: replace <code>YOUR_TOKEN</code> in the commands below.
+</div>
+
+<h3>Test 3 — Access /api/user WITH token (should work)</h3>
+<div class="cw">
+  <div class="cl">curl <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code>curl http://localhost:8080/api/user \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"</code></pre>
+</div>
+<div class="resp-ok">Hello bhaja@mail.com! You are authenticated.</div>
+
+<h3>Test 4 — Access /api/admin as ROLE_USER (should be blocked)</h3>
+<div class="cw">
+  <div class="cl">curl <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code>curl http://localhost:8080/api/admin \
+  -H "Authorization: Bearer YOUR_USER_TOKEN"</code></pre>
+</div>
+<div class="resp-err">{"status":403,"error":"Forbidden"}</div>
+
+<h3>Test 5 — Login as admin, then access /api/admin (should work)</h3>
+<div class="cw">
+  <div class="cl">curl — login as admin <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code>curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@blog.com","password":"admin123"}'</code></pre>
+</div>
+<div class="cw">
+  <div class="cl">curl — use admin token <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code>curl http://localhost:8080/api/admin \
+  -H "Authorization: Bearer ADMIN_TOKEN_HERE"</code></pre>
+</div>
+<div class="resp-ok">Hello Admin! You have full access.</div>
+
+<h3>Test 6 — Try with no token at all (401)</h3>
+<div class="cw">
+  <div class="cl">curl <button class="cb" onclick="cc(this)">copy</button></div>
+  <pre><code>curl http://localhost:8080/api/user</code></pre>
+</div>
+<div class="resp-err">{"status":401,"error":"Unauthorized"}</div>
+
+<hr class="hr">
+
+<h2>All endpoints summary</h2>
+<table>
+  <tr><th>Method</th><th>URL</th><th>Auth Required</th><th>What it does</th></tr>
+  <tr><td><span class="method mpost">POST</span></td><td><code>/auth/register</code></td><td>None</td><td>Register new user (ROLE_USER)</td></tr>
+  <tr><td><span class="method mpost">POST</span></td><td><code>/auth/login</code></td><td>None</td><td>Login → returns JWT token</td></tr>
+  <tr><td><span class="method mget">GET</span></td><td><code>/api/public</code></td><td>None</td><td>Public endpoint</td></tr>
+  <tr><td><span class="method mget">GET</span></td><td><code>/api/user</code></td><td>ROLE_USER or ADMIN</td><td>Any authenticated user</td></tr>
+  <tr><td><span class="method mget">GET</span></td><td><code>/api/admin</code></td><td>ROLE_ADMIN only</td><td>Admin-only endpoint</td></tr>
+  <tr><td><span class="method mget">GET</span></td><td><code>/api/me</code></td><td>Any authenticated</td><td>Shows your email + roles</td></tr>
+</table>
+
+<hr class="hr">
+
+<h2>Practice challenges</h2>
+<div class="box b-pink">
+  <ul>
+    <li>Add a <code>GET /api/users</code> endpoint (ROLE_ADMIN only) that returns all registered users from DB</li>
+    <li>Add a <code>POST /auth/register-admin</code> endpoint that assigns ROLE_ADMIN — protect it with a secret header <code>X-Admin-Key</code></li>
+    <li>Send an intentionally wrong password on login and observe the 401 response</li>
+    <li>Manually modify the token (change one character) and send it — observe the 401 "Invalid JWT" in the console</li>
+    <li><strong>Big challenge:</strong> Plug this security into your Blog App (Project 2) — protect <code>POST/PUT/DELETE /api/posts</code> behind <code>ROLE_ADMIN</code> using <code>@PreAuthorize</code></li>
+  </ul>
+</div>
+
+</div>
+
+<script>
+function cc(btn) {
+  const pre = btn.closest('.cw').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1800);
+  });
+}
+</script>
+</body>
+</html>
